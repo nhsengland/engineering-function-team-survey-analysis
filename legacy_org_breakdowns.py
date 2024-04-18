@@ -27,6 +27,8 @@ multiple_choice_cols = [
 
 def split_and_explode_column(df : pd.DataFrame, col : str, sep : str = ";"):
 
+    df = df.copy()
+
     df[col] = (
         df[col].str.split(sep)
     )
@@ -34,6 +36,7 @@ def split_and_explode_column(df : pd.DataFrame, col : str, sep : str = ";"):
     df = df.explode(col)
 
     return df
+
 
 def group_and_count_cols(df : pd.DataFrame, col_list : list):
 
@@ -43,15 +46,10 @@ def group_and_count_cols(df : pd.DataFrame, col_list : list):
 
     for col in col_list:
         if col in multiple_choice_cols:
-            df[col] = (
-                df[col].str.split(";")
-            )
-
-            df = df.explode(col)
+            df = split_and_explode_column(df, col)
             
     df = df.groupby(col_list).size().reset_index(name=count_col_name)
-    print(col_list[:-1] + [count_col_name]
-    )
+
     df = df.sort_values(col_list[:-1] + [count_col_name], ascending = False)
 
     return df
